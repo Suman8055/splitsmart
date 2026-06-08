@@ -218,7 +218,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
     <div class="cat-grid" id="cat-grid"></div>
   </div>
   <div class="field">
-    <label>Amount (₹)</label>
+    <label>Amount ($)</label>
     <input id="add-amount" type="number" placeholder="0" min="1" inputmode="decimal">
   </div>
   <div class="field">
@@ -850,7 +850,7 @@ function leaveRoom(){
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
-function fmt(n){return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function fmt(n){return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function localDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function catDate(ts){
   const d=new Date(ts);
