@@ -247,9 +247,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 
 <script>
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const BIN_API  = 'https://api.jsonbin.io/v3/b';
-const MASTER_KEY = '$2a$10$8pK9oJJdZvXxY1mN3qP5fOlRkT2uV6wA4bC7dE0gH1iJ9kL8mN5o'; // placeholder — replaced on first run
-const X_ACCESS_KEY = '$2a$10$placeholder'; // not needed for public bins
+const BLOB_API = 'https://jsonblob.com/api/jsonBlob';
 
 const CATS = [
   {key:'rent',     emoji:'🏠', label:'Rent'},
@@ -293,33 +291,37 @@ function loadLocal(code){
   if(raw) S = JSON.parse(raw);
 }
 
-// ─── JSONBIN ──────────────────────────────────────────────────────────────────
+// ─── JSONBLOB (no auth, free) ─────────────────────────────────────────────────
 async function binCreate(){
-  const res = await fetch(BIN_API, {
+  const res = await fetch(BLOB_API, {
     method:'POST',
-    headers:{'Content-Type':'application/json','X-Collection-Name':'splitsmart'},
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
     body: JSON.stringify(S)
   });
-  const j = await res.json();
-  return j.metadata?.id || j.record?.id || j.id || null;
+  if(!res.ok) throw new Error('create failed');
+  // blob ID is in the Location header: /api/jsonBlob/<id>
+  const loc = res.headers.get('location') || '';
+  const id = loc.split('/').pop();
+  return id || null;
 }
 
 async function binGet(id){
-  const res = await fetch(`${BIN_API}/${id}/latest`, {cache:'no-store'});
+  const res = await fetch(`${BLOB_API}/${id}`, {
+    headers:{'Accept':'application/json'},
+    cache:'no-store'
+  });
   if(!res.ok) throw new Error('fetch failed');
-  const j = await res.json();
-  return j.record;
+  return res.json();
 }
 
 async function binPut(id, data){
-  const res = await fetch(`${BIN_API}/${id}`, {
+  const res = await fetch(`${BLOB_API}/${id}`, {
     method:'PUT',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
     body: JSON.stringify(data)
   });
   if(!res.ok) throw new Error('put failed');
-  const j = await res.json();
-  return j.record;
+  return res.json();
 }
 
 // ─── SYNC ─────────────────────────────────────────────────────────────────────
