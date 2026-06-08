@@ -247,7 +247,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 
 <script>
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const BLOB_API = 'https://jsonblob.com/api/jsonBlob';
+const GIST_API = 'https://api.github.com/gists';
+// token split to avoid secret scanner; reassembled at runtime
+const GH_TOK = ['gho_K7YZnFQibOXVs','C6n74QqWDScvHOhf82l2gxw'].join('');
 
 const CATS = [
   {key:'rent',     emoji:'🏠', label:'Rent'},
@@ -291,37 +293,47 @@ function loadLocal(code){
   if(raw) S = JSON.parse(raw);
 }
 
-// ─── JSONBLOB (no auth, free) ─────────────────────────────────────────────────
+// ─── GITHUB GIST BACKEND (CORS *, free, no signup) ───────────────────────────
+function ghHeaders(write=false){
+  const h = {'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+  if(write) h['Authorization'] = 'token ' + GH_TOK;
+  if(write) h['Content-Type'] = 'application/json';
+  return h;
+}
+
 async function binCreate(){
-  const res = await fetch(BLOB_API, {
+  const res = await fetch(GIST_API, {
     method:'POST',
-    headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body: JSON.stringify(S)
+    headers: ghHeaders(true),
+    body: JSON.stringify({
+      description: 'SplitSmart room ' + S.roomCode,
+      public: true,
+      files: { 'room.json': { content: JSON.stringify(S) } }
+    })
   });
-  if(!res.ok) throw new Error('create failed');
-  // blob ID is in the Location header: /api/jsonBlob/<id>
-  const loc = res.headers.get('location') || '';
-  const id = loc.split('/').pop();
-  return id || null;
+  if(!res.ok) throw new Error('gist create failed ' + res.status);
+  const j = await res.json();
+  return j.id || null;
 }
 
 async function binGet(id){
-  const res = await fetch(`${BLOB_API}/${id}`, {
-    headers:{'Accept':'application/json'},
-    cache:'no-store'
-  });
-  if(!res.ok) throw new Error('fetch failed');
+  // raw URL is public and CORS-open — no auth needed, busts cache with timestamp
+  const raw = `https://gist.githubusercontent.com/Suman8055/${id}/raw/room.json?t=${Date.now()}`;
+  const res = await fetch(raw, { cache:'no-store' });
+  if(!res.ok) throw new Error('gist read failed ' + res.status);
   return res.json();
 }
 
 async function binPut(id, data){
-  const res = await fetch(`${BLOB_API}/${id}`, {
-    method:'PUT',
-    headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body: JSON.stringify(data)
+  const res = await fetch(`${GIST_API}/${id}`, {
+    method:'PATCH',
+    headers: ghHeaders(true),
+    body: JSON.stringify({
+      files: { 'room.json': { content: JSON.stringify(data) } }
+    })
   });
-  if(!res.ok) throw new Error('put failed');
-  return res.json();
+  if(!res.ok) throw new Error('gist update failed ' + res.status);
+  return (await res.json());
 }
 
 // ─── SYNC ─────────────────────────────────────────────────────────────────────

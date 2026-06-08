@@ -1,4 +1,4 @@
-const CACHE = 'splitsmart-v2';
+const CACHE = 'splitsmart-v3';
 const ASSETS = ['/splitsmart/', '/splitsmart/index.html', '/splitsmart/manifest.json', '/splitsmart/icon.png'];
 
 self.addEventListener('install', e => {
@@ -13,7 +13,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   // let API calls (jsonbin, qrserver) go through network only
-  if (e.request.url.includes('jsonblob.com') || e.request.url.includes('qrserver.com')) {
+  if (e.request.url.includes('github.com') || e.request.url.includes('githubusercontent.com') || e.request.url.includes('qrserver.com')) {
     e.respondWith(fetch(e.request).catch(() => new Response('', {status: 503})));
     return;
   }
