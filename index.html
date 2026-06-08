@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SplitSmart">
+<meta name="theme-color" content="#5E5CE6">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>SplitSmart</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --purple:#5E5CE6;--green:#34C759;--red:#FF3B30;--orange:#FF9500;--blue:#007AFF;
+  --bg:#F2F2F7;--card:#FFF;--text:#000;--sub:#6C6C70;--sep:#C6C6C8;--overlay:rgba(0,0,0,.45);
+  --safe-top:env(safe-area-inset-top,20px);--safe-bot:env(safe-area-inset-bottom,0px);
+  --nav:72px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1C1C1E;--card:#2C2C2E;--text:#FFF;--sub:#8E8E93;--sep:#38383A;--overlay:rgba(0,0,0,.6)}
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background:var(--bg);color:var(--text)}
+#app{position:fixed;top:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* HEADER */
+#hdr{background:var(--card);padding:calc(var(--safe-top) + 6px) 16px 10px;border-bottom:1px solid var(--sep);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#hdr h1{font-size:18px;font-weight:700;color:var(--purple)}
+#hdr .badge{font-size:12px;color:var(--sub);background:var(--bg);padding:3px 8px;border-radius:12px;border:1px solid var(--sep);cursor:pointer}
+#hdr .badge.live{border-color:var(--green);color:var(--green)}
+
+/* NAV */
+#nav{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--sep);display:flex;padding-bottom:var(--safe-bot);z-index:100;flex-shrink:0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;background:none;border:none;color:var(--sub);font-size:10px;cursor:pointer;transition:color .15s}
+.nav-btn svg{width:22px;height:22px}
+.nav-btn.on{color:var(--purple)}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:var(--nav)}
+
+/* CARDS */
+.card{background:var(--card);border-radius:14px;padding:16px;margin:12px 16px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card-title{font-size:13px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+
+/* BUTTONS */
+.btn{display:block;width:100%;padding:14px;border-radius:12px;border:none;font-size:16px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn:active{opacity:.7}
+.btn-primary{background:var(--purple);color:#fff}
+.btn-secondary{background:var(--bg);color:var(--purple);border:1.5px solid var(--purple)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+
+/* INPUTS */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--sub);margin-bottom:5px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:12px;border:1.5px solid var(--sep);border-radius:10px;background:var(--bg);color:var(--text);font-size:16px;outline:none;font-family:inherit;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--purple)}
+.field textarea{resize:none;height:60px}
+
+/* ONBOARDING SCREEN */
+#screen-onboard{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:200}
+#screen-onboard h1{font-size:32px;font-weight:800;color:var(--purple);margin-bottom:6px}
+#screen-onboard p{color:var(--sub);margin-bottom:32px;text-align:center;font-size:15px}
+.onboard-sep{display:flex;align-items:center;gap:10px;margin:20px 0;width:100%}
+.onboard-sep span{color:var(--sub);font-size:13px;white-space:nowrap}
+.onboard-sep hr{flex:1;border:none;border-top:1px solid var(--sep)}
+
+/* NAME SCREEN */
+#screen-name{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:200}
+#screen-name h2{font-size:22px;font-weight:700;margin-bottom:8px}
+#screen-name p{color:var(--sub);margin-bottom:28px;text-align:center}
+
+/* EXPENSE LIST */
+.exp-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--sep)}
+.exp-item:last-child{border-bottom:none}
+.exp-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.exp-info{flex:1;min-width:0}
+.exp-info .top{display:flex;justify-content:space-between;align-items:baseline}
+.exp-info .name{font-weight:600;font-size:15px}
+.exp-info .amt{font-weight:700;font-size:16px}
+.exp-info .bot{font-size:12px;color:var(--sub);margin-top:2px}
+.exp-del{background:none;border:none;color:var(--sub);font-size:18px;cursor:pointer;padding:6px}
+
+/* SPLIT SUMMARY */
+.split-person{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--sep)}
+.split-person:last-child{border-bottom:none}
+.split-person .pname{font-weight:600;font-size:16px}
+.split-person .ptotal{font-size:20px;font-weight:700}
+.balance-box{border-radius:14px;padding:18px;text-align:center;margin:12px 16px 0}
+.balance-box.owe{background:#FF3B3015;border:1.5px solid var(--red)}
+.balance-box.owes{background:#34C75915;border:1.5px solid var(--green)}
+.balance-box.settled{background:var(--bg);border:1.5px solid var(--sep)}
+.balance-box .label{font-size:13px;color:var(--sub);margin-bottom:4px}
+.balance-box .amount{font-size:28px;font-weight:800}
+.balance-box .desc{font-size:14px;color:var(--sub);margin-top:4px}
+
+/* SHARE PANEL */
+#share-panel{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bot));z-index:300;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+#share-panel.open{transform:translateY(0)}
+#share-panel h3{font-size:17px;font-weight:700;margin-bottom:16px}
+#share-overlay{position:fixed;inset:0;background:var(--overlay);z-index:299;display:none}
+#share-overlay.open{display:block}
+.code-box{background:var(--bg);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px}
+.code-box .code{font-size:32px;font-weight:800;letter-spacing:6px;color:var(--purple)}
+.code-box small{font-size:12px;color:var(--sub)}
+
+/* SYNC DOT */
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--sub);display:inline-block;margin-right:4px}
+.sync-dot.syncing{background:var(--orange);animation:pulse .8s infinite}
+.sync-dot.ok{background:var(--green)}
+.sync-dot.err{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TOAST */
+#toast{position:fixed;top:calc(var(--safe-top) + 60px);left:50%;transform:translateX(-50%) translateY(-20px);background:#333;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 24px;color:var(--sub)}
+.empty .icon{font-size:48px;margin-bottom:12px}
+.empty p{font-size:15px}
+
+/* LOADER */
+.spinner{width:24px;height:24px;border:3px solid var(--sep);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ADD SHEET */
+#add-sheet{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bot));z-index:300;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:92vh;overflow-y:auto}
+#add-sheet.open{transform:translateY(0)}
+#add-overlay{position:fixed;inset:0;background:var(--overlay);z-index:299;display:none}
+#add-overlay.open{display:block}
+#add-sheet h3{font-size:17px;font-weight:700;margin-bottom:16px}
+
+/* QR */
+#qr-img{width:160px;height:160px;margin:0 auto 12px;display:block;border-radius:10px}
+
+/* PERSON CHIP */
+.person-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--sep);font-size:14px;cursor:pointer;margin-right:8px;transition:all .15s}
+.person-chip.selected{border-color:var(--purple);background:var(--purple)15;color:var(--purple);font-weight:600}
+
+/* CATEGORY GRID */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.cat-btn{padding:10px 6px;border-radius:10px;border:1.5px solid var(--sep);background:var(--bg);color:var(--text);font-size:13px;cursor:pointer;text-align:center;transition:all .15s}
+.cat-btn.selected{border-color:var(--purple);background:var(--purple)15;color:var(--purple);font-weight:600}
+
+/* HISTORY FILTER */
+.filter-row{display:flex;gap:8px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid var(--sep);background:var(--card);color:var(--sub);font-size:13px;cursor:pointer}
+.filter-chip.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+
+.fab{position:fixed;bottom:calc(var(--nav) + 16px);right:calc(max((100vw - 480px)/2, 0px) + 16px);width:52px;height:52px;border-radius:50%;background:var(--purple);color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 14px rgba(94,92,230,.4);display:flex;align-items:center;justify-content:center;z-index:50}
+
+.settle-btn{display:block;width:calc(100% - 32px);margin:12px 16px 0;padding:14px;border-radius:12px;border:none;background:var(--green);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <h1>✂️ SplitSmart</h1>
+    <span id="status-badge" class="badge" onclick="openShare()">No session</span>
+  </div>
+  <div id="content"></div>
+  <nav id="nav">
+    <button class="nav-btn on" id="nb-home" onclick="showTab('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Summary
+    </button>
+    <button class="nav-btn" id="nb-expenses" onclick="showTab('expenses')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Expenses
+    </button>
+    <button class="nav-btn" id="nb-split" onclick="showTab('split')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Split
+    </button>
+    <button class="nav-btn" id="nb-share" onclick="openShare()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Share
+    </button>
+  </nav>
+</div>
+
+<!-- ONBOARDING -->
+<div id="screen-onboard">
+  <h1>✂️ SplitSmart</h1>
+  <p>Split expenses between two people.<br>Create a room or join with a code.</p>
+  <button class="btn btn-primary" onclick="createRoom()" style="margin-bottom:12px">Create New Room</button>
+  <div class="onboard-sep"><hr><span>OR JOIN EXISTING</span><hr></div>
+  <div class="field" style="width:100%;margin-bottom:12px">
+    <input id="join-code" type="text" placeholder="Enter 6-letter room code" maxlength="6" style="text-align:center;font-size:22px;letter-spacing:6px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+  </div>
+  <button class="btn btn-secondary" onclick="joinRoom()">Join Room</button>
+</div>
+
+<!-- NAME ENTRY -->
+<div id="screen-name" style="display:none">
+  <h2>Who are you?</h2>
+  <p id="name-prompt">Enter your name so the other person knows who added what.</p>
+  <div class="field" style="width:100%;margin-bottom:20px">
+    <input id="my-name-input" type="text" placeholder="Your name (e.g. Rahul)" maxlength="20" style="text-align:center;font-size:18px">
+  </div>
+  <button class="btn btn-primary" onclick="saveName()">Enter Room</button>
+</div>
+
+<!-- ADD EXPENSE SHEET -->
+<div id="add-overlay" onclick="closeAdd()"></div>
+<div id="add-sheet">
+  <h3>Add Expense</h3>
+  <div class="field">
+    <label>Paid by</label>
+    <div id="payer-chips" style="margin-top:2px"></div>
+  </div>
+  <div class="field">
+    <label>Category</label>
+    <div class="cat-grid" id="cat-grid"></div>
+  </div>
+  <div class="field">
+    <label>Amount (₹)</label>
+    <input id="add-amount" type="number" placeholder="0" min="1" inputmode="decimal">
+  </div>
+  <div class="field">
+    <label>Note (optional)</label>
+    <textarea id="add-note" placeholder="e.g. June rent, Swiggy order…"></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="submitExpense()">Add Expense</button>
+</div>
+
+<!-- SHARE PANEL -->
+<div id="share-overlay" onclick="closeShare()"></div>
+<div id="share-panel">
+  <h3>Share Room</h3>
+  <div class="code-box">
+    <div class="code" id="share-code-display">------</div>
+    <small>Room Code</small>
+  </div>
+  <img id="qr-img" src="" alt="QR Code" style="display:none">
+  <button class="btn btn-secondary" onclick="copyLink()" style="margin-bottom:10px">Copy Invite Link</button>
+  <button class="btn btn-secondary" onclick="showQR()" id="qr-btn">Show QR Code</button>
+  <hr style="border:none;border-top:1px solid var(--sep);margin:16px 0">
+  <button class="btn btn-danger" onclick="leaveRoom()">Leave Room</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
+const BIN_API  = 'https://api.jsonbin.io/v3/b';
+const MASTER_KEY = '$2a$10$8pK9oJJdZvXxY1mN3qP5fOlRkT2uV6wA4bC7dE0gH1iJ9kL8mN5o'; // placeholder — replaced on first run
+const X_ACCESS_KEY = '$2a$10$placeholder'; // not needed for public bins
+
+const CATS = [
+  {key:'rent',     emoji:'🏠', label:'Rent'},
+  {key:'utilities',emoji:'💡', label:'Utilities'},
+  {key:'groceries',emoji:'🛒', label:'Groceries'},
+  {key:'food',     emoji:'🍜', label:'Food'},
+  {key:'transport',emoji:'🚗', label:'Transport'},
+  {key:'health',   emoji:'💊', label:'Health'},
+  {key:'shopping', emoji:'🛍️', label:'Shopping'},
+  {key:'other',    emoji:'📌', label:'Other'},
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let S = {
+  roomCode: '',
+  binId: '',
+  members: [],    // [{name, joinedAt}]
+  expenses: [],   // [{id, payer, category, amount, note, date, ts}]
+  settled: [],    // [{ts, fromName, toName, amount}]
+  nextId: 1,
+};
+let myName = '';
+let curTab = 'home';
+let addPayer = '';
+let addCat = '';
+let syncInterval = null;
+let lastSyncTs = 0;
+let syncStatus = 'idle'; // idle | syncing | ok | err
+let histFilter = 'all';
+
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+function lsKey(){return 'ss_room_' + S.roomCode}
+function saveLocal(){
+  if(!S.roomCode) return;
+  localStorage.setItem(lsKey(), JSON.stringify(S));
+  localStorage.setItem('ss_myname', myName);
+  localStorage.setItem('ss_lastroom', S.roomCode);
+}
+function loadLocal(code){
+  const raw = localStorage.getItem('ss_room_' + code);
+  if(raw) S = JSON.parse(raw);
+}
+
+// ─── JSONBIN ──────────────────────────────────────────────────────────────────
+async function binCreate(){
+  const res = await fetch(BIN_API, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Collection-Name':'splitsmart'},
+    body: JSON.stringify(S)
+  });
+  const j = await res.json();
+  return j.metadata?.id || j.record?.id || j.id || null;
+}
+
+async function binGet(id){
+  const res = await fetch(`${BIN_API}/${id}/latest`, {cache:'no-store'});
+  if(!res.ok) throw new Error('fetch failed');
+  const j = await res.json();
+  return j.record;
+}
+
+async function binPut(id, data){
+  const res = await fetch(`${BIN_API}/${id}`, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  if(!res.ok) throw new Error('put failed');
+  const j = await res.json();
+  return j.record;
+}
+
+// ─── SYNC ─────────────────────────────────────────────────────────────────────
+function setSyncStatus(s){
+  syncStatus = s;
+  const badge = document.getElementById('status-badge');
+  if(!badge) return;
+  const dot = badge.querySelector('.sync-dot') ? badge.querySelector('.sync-dot') : null;
+  if(s === 'ok'){
+    badge.className = 'badge live';
+    badge.innerHTML = `<span class="sync-dot ok"></span>${S.roomCode}`;
+  } else if(s === 'syncing'){
+    badge.className = 'badge';
+    badge.innerHTML = `<span class="sync-dot syncing"></span>syncing…`;
+  } else if(s === 'err'){
+    badge.className = 'badge';
+    badge.innerHTML = `<span class="sync-dot err"></span>offline`;
+  } else {
+    badge.className = 'badge';
+    badge.innerHTML = S.roomCode || 'No session';
+  }
+}
+
+async function syncNow(push=false){
+  if(!S.binId) return;
+  setSyncStatus('syncing');
+  try {
+    const remote = await binGet(S.binId);
+    // merge: take remote expenses + add any local-only ones
+    const remoteIds = new Set((remote.expenses||[]).map(e=>e.id));
+    const localOnly = S.expenses.filter(e=>!remoteIds.has(e.id));
+    if(push || localOnly.length > 0){
+      const merged = {...remote, expenses:[...remote.expenses,...localOnly]};
+      merged.members = mergeMembersArr(remote.members||[], S.members||[]);
+      merged.settled = mergeArr(remote.settled||[], S.settled||[], 'ts');
+      merged.nextId = Math.max(remote.nextId||1, S.nextId||1);
+      await binPut(S.binId, merged);
+      S = merged;
+    } else {
+      S.expenses = remote.expenses || [];
+      S.members  = mergeMembersArr(remote.members||[], S.members||[]);
+      S.settled  = mergeArr(remote.settled||[], S.settled||[], 'ts');
+      S.nextId   = Math.max(remote.nextId||1, S.nextId||1);
+    }
+    saveLocal();
+    setSyncStatus('ok');
+    renderTab();
+  } catch(e){
+    setSyncStatus('err');
+  }
+}
+
+function mergeArr(a, b, key){
+  const m = new Map();
+  [...a,...b].forEach(x=>m.set(x[key],x));
+  return [...m.values()];
+}
+function mergeMembersArr(a, b){
+  const m = new Map();
+  [...a,...b].forEach(x=>m.set(x.name,x));
+  return [...m.values()];
+}
+
+function startSync(){
+  if(syncInterval) clearInterval(syncInterval);
+  syncInterval = setInterval(()=>syncNow(false), 5000);
+  syncNow(false);
+}
+
+// ─── ROOM ─────────────────────────────────────────────────────────────────────
+function genCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c='';for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+
+async function createRoom(){
+  const code = genCode();
+  S = {roomCode:code, binId:'', members:[], expenses:[], settled:[], nextId:1};
+  setSyncStatus('syncing');
+  try{
+    const id = await binCreate();
+    if(!id) throw new Error('no id');
+    S.binId = id;
+    saveLocal();
+    localStorage.setItem('ss_lastroom', code);
+    showNameScreen('You created room <b>' + code + '</b>. Enter your name to continue.');
+  } catch(e){
+    toast('Could not create room. Check connection.');
+    setSyncStatus('err');
+  }
+}
+
+async function joinRoom(){
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  if(code.length !== 6){toast('Enter the 6-letter room code');return;}
+  // check local cache first
+  const local = localStorage.getItem('ss_room_' + code);
+  if(local){
+    S = JSON.parse(local);
+    myName = localStorage.getItem('ss_myname') || '';
+    if(myName && S.members.find(m=>m.name===myName)){
+      enterApp(); return;
+    }
+    showNameScreen('Room found! Enter your name to join.');
+    return;
+  }
+  // need to search jsonbin by fetching all bins (we store binId in URL hash)
+  toast('Room code not found locally. Ask your partner to share the full link.');
+}
+
+function showNameScreen(msg=''){
+  document.getElementById('screen-onboard').style.display='none';
+  document.getElementById('screen-name').style.display='flex';
+  if(msg) document.getElementById('name-prompt').innerHTML = msg;
+}
+
+function saveName(){
+  const n = document.getElementById('my-name-input').value.trim();
+  if(!n){toast('Enter your name');return;}
+  myName = n;
+  if(!S.members.find(m=>m.name===myName)){
+    S.members.push({name:myName, joinedAt:Date.now()});
+  }
+  saveLocal();
+  syncNow(true).then(()=>{
+    enterApp();
+  });
+}
+
+function enterApp(){
+  document.getElementById('screen-onboard').style.display='none';
+  document.getElementById('screen-name').style.display='none';
+  document.querySelector('#add-sheet').style.display='';
+  // set default payer to self
+  addPayer = myName;
+  addCat = 'rent';
+  setSyncStatus('ok');
+  updateShareCode();
+  startSync();
+  renderTab();
+  // check URL for join code
+}
+
+function updateShareCode(){
+  const el = document.getElementById('share-code-display');
+  if(el) el.textContent = S.roomCode || '------';
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(t){
+  curTab = t;
+  ['home','expenses','split','share'].forEach(id=>{
+    document.getElementById('nb-'+id)?.classList.toggle('on',id===t);
+  });
+  if(t==='share'){openShare();return;}
+  renderTab();
+}
+
+function renderTab(){
+  if(curTab==='home') renderHome();
+  else if(curTab==='expenses') renderExpenses();
+  else if(curTab==='split') renderSplit();
+}
+
+// ─── HOME TAB ─────────────────────────────────────────────────────────────────
+function renderHome(){
+  const names = S.members.map(m=>m.name);
+  const byPerson = {};
+  names.forEach(n=>byPerson[n]=0);
+  S.expenses.forEach(e=>{
+    if(byPerson[e.payer]!==undefined) byPerson[e.payer]+=e.amount;
+    else byPerson[e.payer]=e.amount;
+  });
+  const total = Object.values(byPerson).reduce((a,b)=>a+b,0);
+  const cats = {};
+  S.expenses.forEach(e=>{
+    cats[e.category]=(cats[e.category]||0)+e.amount;
+  });
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+  const recent = [...S.expenses].sort((a,b)=>b.ts-a.ts).slice(0,3);
+
+  let html = `<div class="card">
+    <div class="card-title">Room · ${esc(S.roomCode)}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="color:var(--sub);font-size:14px">Total Spent</span>
+      <span style="font-size:26px;font-weight:800">${fmt(total)}</span>
+    </div>`;
+
+  if(names.length < 2){
+    html += `<div style="color:var(--sub);font-size:13px;text-align:center;padding:8px 0">Waiting for partner to join…<br>Share the room code <b>${esc(S.roomCode)}</b></div>`;
+  } else {
+    names.forEach(n=>{
+      const pct = total > 0 ? Math.round((byPerson[n]||0)/total*100) : 0;
+      html += `<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:3px">
+          <span style="font-weight:600">${esc(n)}</span>
+          <span>${fmt(byPerson[n]||0)} <span style="color:var(--sub)">(${pct}%)</span></span>
+        </div>
+        <div style="background:var(--sep);border-radius:4px;height:6px;overflow:hidden">
+          <div style="background:var(--purple);height:100%;width:${pct}%;border-radius:4px"></div>
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+
+  if(topCat){
+    const catInfo = CATS.find(c=>c.key===topCat[0])||{emoji:'📌',label:topCat[0]};
+    html += `<div class="card"><div class="card-title">Top Category</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:28px">${catInfo.emoji}</span>
+        <div><div style="font-weight:700;font-size:16px">${catInfo.label}</div>
+        <div style="color:var(--sub);font-size:13px">${fmt(topCat[1])} spent</div></div>
+      </div></div>`;
+  }
+
+  if(recent.length){
+    html += `<div class="card"><div class="card-title">Recent</div>`;
+    recent.forEach(e=>{
+      const c = CATS.find(x=>x.key===e.category)||{emoji:'📌',label:e.category};
+      html += `<div class="exp-item">
+        <div class="exp-icon" style="background:${catColor(e.category)}20">${c.emoji}</div>
+        <div class="exp-info">
+          <div class="top"><span class="name">${esc(e.note||c.label)}</span><span class="amt">${fmt(e.amount)}</span></div>
+          <div class="bot">${esc(e.payer)} · ${catDate(e.ts)}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="empty"><div class="icon">💸</div><p>No expenses yet.<br>Add the first one!</p></div>`;
+  }
+  html += `<div style="height:16px"></div>`;
+  document.getElementById('content').innerHTML = html;
+  renderFab();
+}
+
+// ─── EXPENSES TAB ─────────────────────────────────────────────────────────────
+function renderExpenses(){
+  const names = ['all', ...S.members.map(m=>m.name)];
+  let exps = [...S.expenses].sort((a,b)=>b.ts-a.ts);
+  if(histFilter !== 'all') exps = exps.filter(e=>e.payer===histFilter);
+
+  let html = `<div class="filter-row">`;
+  names.forEach(n=>{
+    html += `<button class="filter-chip ${histFilter===n?'on':''}" onclick="setFilter('${esc(n)}')">${n==='all'?'All':esc(n)}</button>`;
+  });
+  html += `</div>`;
+
+  if(!exps.length){
+    html += `<div class="empty"><div class="icon">📋</div><p>No expenses yet.</p></div>`;
+  } else {
+    html += `<div class="card">`;
+    exps.forEach(e=>{
+      const c = CATS.find(x=>x.key===e.category)||{emoji:'📌',label:e.category};
+      html += `<div class="exp-item">
+        <div class="exp-icon" style="background:${catColor(e.category)}20">${c.emoji}</div>
+        <div class="exp-info">
+          <div class="top"><span class="name">${esc(e.note||c.label)}</span><span class="amt" style="color:var(--red)">${fmt(e.amount)}</span></div>
+          <div class="bot">${esc(e.payer)} · ${c.label} · ${catDate(e.ts)}</div>
+        </div>
+        <button class="exp-del" onclick="delExpense('${e.id}')">🗑</button>
+      </div>`;
+    });
+    html += `</div><div style="height:16px"></div>`;
+  }
+  document.getElementById('content').innerHTML = html;
+  renderFab();
+}
+
+function setFilter(n){histFilter=n;renderExpenses();}
+
+// ─── SPLIT TAB ────────────────────────────────────────────────────────────────
+function renderSplit(){
+  const names = S.members.map(m=>m.name);
+  if(names.length < 2){
+    document.getElementById('content').innerHTML = `<div class="empty"><div class="icon">🤝</div><p>Need 2 people in the room<br>to calculate a split.</p></div>`;
+    return;
+  }
+
+  const [nameA, nameB] = names;
+  let totalA=0, totalB=0;
+  S.expenses.forEach(e=>{
+    if(e.payer===nameA) totalA+=e.amount;
+    else if(e.payer===nameB) totalB+=e.amount;
+  });
+  const total = totalA + totalB;
+  const eachShouldPay = total / 2;
+  const diff = Math.abs(totalA - totalB) / 2;
+  const aOwesB = totalA < totalB; // A paid less, so A owes B
+
+  // by category breakdown
+  const byCat = {};
+  S.expenses.forEach(e=>{
+    byCat[e.category]=(byCat[e.category]||0)+e.amount;
+  });
+
+  let html = `<div class="card">
+    <div class="card-title">Who Paid What</div>
+    <div class="split-person">
+      <span class="pname">👤 ${esc(nameA)}</span>
+      <span class="ptotal" style="color:var(--purple)">${fmt(totalA)}</span>
+    </div>
+    <div class="split-person">
+      <span class="pname">👤 ${esc(nameB)}</span>
+      <span class="ptotal" style="color:var(--blue)">${fmt(totalB)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:12px 0;font-size:14px;color:var(--sub)">
+      <span>Total</span><span style="color:var(--text);font-weight:700">${fmt(total)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:0 0 4px;font-size:14px;color:var(--sub)">
+      <span>Each should pay</span><span style="color:var(--text);font-weight:700">${fmt(eachShouldPay)}</span>
+    </div>
+  </div>`;
+
+  if(diff < 1){
+    html += `<div class="balance-box settled">
+      <div class="label">Settlement</div>
+      <div class="amount" style="color:var(--green)">All settled! ✅</div>
+      <div class="desc">Both paid equally</div>
+    </div>`;
+  } else if(aOwesB){
+    html += `<div class="balance-box owe">
+      <div class="label">${esc(nameA)} owes ${esc(nameB)}</div>
+      <div class="amount" style="color:var(--red)">${fmt(diff)}</div>
+      <div class="desc">${esc(nameA)} paid less — needs to transfer ${fmt(diff)} to ${esc(nameB)}</div>
+    </div>`;
+  } else {
+    html += `<div class="balance-box owes">
+      <div class="label">${esc(nameB)} owes ${esc(nameA)}</div>
+      <div class="amount" style="color:var(--red)">${fmt(diff)}</div>
+      <div class="desc">${esc(nameB)} paid less — needs to transfer ${fmt(diff)} to ${esc(nameA)}</div>
+    </div>`;
+  }
+
+  // category breakdown
+  const catEntries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  if(catEntries.length){
+    html += `<div class="card"><div class="card-title">By Category</div>`;
+    catEntries.forEach(([k,v])=>{
+      const c = CATS.find(x=>x.key===k)||{emoji:'📌',label:k};
+      const pct = total>0?Math.round(v/total*100):0;
+      html += `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:3px">
+          <span>${c.emoji} ${c.label}</span>
+          <span style="font-weight:600">${fmt(v)} <span style="color:var(--sub)">(${pct}%)</span></span>
+        </div>
+        <div style="background:var(--sep);border-radius:4px;height:5px;overflow:hidden">
+          <div style="background:${catColor(k)};height:100%;width:${pct}%;border-radius:4px"></div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // settle button
+  if(diff >= 1){
+    const ower = aOwesB ? nameA : nameB;
+    const owed = aOwesB ? nameB : nameA;
+    html += `<button class="settle-btn" onclick="markSettled('${esc(ower)}','${esc(owed)}',${diff})">Mark as Settled ✅</button>`;
+  }
+
+  // settlement history
+  if(S.settled && S.settled.length){
+    html += `<div class="card"><div class="card-title">Settlement History</div>`;
+    [...S.settled].reverse().forEach(s=>{
+      html += `<div class="exp-item">
+        <div class="exp-icon" style="background:#34C75920">✅</div>
+        <div class="exp-info">
+          <div class="top"><span class="name">${esc(s.fromName)} → ${esc(s.toName)}</span><span class="amt" style="color:var(--green)">${fmt(s.amount)}</span></div>
+          <div class="bot">${catDate(s.ts)}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div style="height:16px"></div>`;
+  document.getElementById('content').innerHTML = html;
+}
+
+async function markSettled(fromName, toName, amount){
+  S.settled = S.settled || [];
+  S.settled.push({ts:Date.now(), fromName, toName, amount});
+  // clear all expenses after settlement
+  S.expenses = [];
+  saveLocal();
+  await syncNow(true);
+  toast('Settled! All expenses cleared.');
+  renderSplit();
+}
+
+// ─── ADD EXPENSE ──────────────────────────────────────────────────────────────
+function renderFab(){
+  let fab = document.querySelector('.fab');
+  if(!fab){
+    fab = document.createElement('button');
+    fab.className='fab';
+    fab.innerHTML='+';
+    fab.onclick=openAdd;
+    document.getElementById('app').appendChild(fab);
+  }
+}
+
+function openAdd(){
+  // populate payer chips
+  const chips = document.getElementById('payer-chips');
+  const names = S.members.map(m=>m.name);
+  chips.innerHTML = names.map(n=>`<span class="person-chip ${addPayer===n?'selected':''}" onclick="selPayer('${esc(n)}')">${esc(n)}</span>`).join('');
+
+  // populate category grid
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = CATS.map(c=>`<button class="cat-btn ${addCat===c.key?'selected':''}" onclick="selCat('${c.key}')">${c.emoji}<br>${c.label}</button>`).join('');
+
+  document.getElementById('add-amount').value='';
+  document.getElementById('add-note').value='';
+  document.getElementById('add-sheet').classList.add('open');
+  document.getElementById('add-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('add-amount').focus(),350);
+}
+
+function closeAdd(){
+  document.getElementById('add-sheet').classList.remove('open');
+  document.getElementById('add-overlay').classList.remove('open');
+}
+
+function selPayer(n){
+  addPayer=n;
+  document.querySelectorAll('.person-chip').forEach(el=>{
+    el.classList.toggle('selected', el.textContent===n);
+  });
+}
+
+function selCat(k){
+  addCat=k;
+  document.querySelectorAll('.cat-btn').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.cat===k);
+  });
+  document.getElementById('cat-grid').innerHTML = CATS.map(c=>`<button class="cat-btn ${addCat===c.key?'selected':''}" onclick="selCat('${c.key}')" data-cat="${c.key}">${c.emoji}<br>${c.label}</button>`).join('');
+}
+
+async function submitExpense(){
+  if(!addPayer){toast('Select who paid');return;}
+  if(!addCat){toast('Select a category');return;}
+  const amt = parseFloat(document.getElementById('add-amount').value);
+  if(!amt || amt <= 0){toast('Enter a valid amount');return;}
+  const note = document.getElementById('add-note').value.trim();
+  const exp = {
+    id: 'e' + Date.now() + Math.random().toString(36).slice(2,5),
+    payer: addPayer,
+    category: addCat,
+    amount: amt,
+    note: note,
+    date: localDate(),
+    ts: Date.now()
+  };
+  S.expenses.push(exp);
+  S.nextId++;
+  closeAdd();
+  saveLocal();
+  await syncNow(true);
+  toast('Expense added!');
+  renderTab();
+}
+
+async function delExpense(id){
+  S.expenses = S.expenses.filter(e=>e.id!==id);
+  saveLocal();
+  await syncNow(true);
+  renderTab();
+}
+
+// ─── SHARE PANEL ──────────────────────────────────────────────────────────────
+function openShare(){
+  updateShareCode();
+  document.getElementById('share-panel').classList.add('open');
+  document.getElementById('share-overlay').classList.add('open');
+  // reset qr
+  document.getElementById('qr-img').style.display='none';
+  document.getElementById('qr-btn').textContent='Show QR Code';
+}
+function closeShare(){
+  document.getElementById('share-panel').classList.remove('open');
+  document.getElementById('share-overlay').classList.remove('open');
+  // bring share tab back to nav
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('nb-'+curTab)?.classList.add('on');
+}
+
+function copyLink(){
+  const url = buildShareUrl();
+  if(navigator.clipboard) navigator.clipboard.writeText(url).then(()=>toast('Link copied!'));
+  else{
+    const ta=document.createElement('textarea');
+    ta.value=url;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    toast('Link copied!');
+  }
+}
+
+function buildShareUrl(){
+  const base = location.href.split('?')[0].split('#')[0];
+  return `${base}?s=${S.roomCode}&b=${S.binId}`;
+}
+
+function showQR(){
+  const url = buildShareUrl();
+  // use a public QR API
+  const encoded = encodeURIComponent(url);
+  const img = document.getElementById('qr-img');
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encoded}`;
+  img.style.display='block';
+  document.getElementById('qr-btn').textContent='Hide QR Code';
+  img.onclick=()=>{img.style.display='none';document.getElementById('qr-btn').textContent='Show QR Code';};
+}
+
+function leaveRoom(){
+  if(!confirm('Leave this room? Your local data will be cleared.')) return;
+  clearInterval(syncInterval);
+  localStorage.removeItem(lsKey());
+  localStorage.removeItem('ss_lastroom');
+  localStorage.removeItem('ss_myname');
+  location.reload();
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function fmt(n){return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function localDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function catDate(ts){
+  const d=new Date(ts);
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+}
+const CAT_COLORS={'rent':'#5E5CE6','utilities':'#FF9500','groceries':'#34C759','food':'#FF6B6B','transport':'#007AFF','health':'#FF3B30','shopping':'#AF52DE','other':'#8E8E93'};
+function catColor(k){return CAT_COLORS[k]||'#8E8E93'}
+let _toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ─── SW REGISTRATION ─────────────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/splitsmart/sw.js').catch(()=>{});
+  });
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+(function boot(){
+  // check URL params first (partner joining via shared link)
+  const params = new URLSearchParams(location.search);
+  const urlCode = params.get('s');
+  const urlBin  = params.get('b');
+
+  if(urlCode && urlBin){
+    // joining via link
+    const local = localStorage.getItem('ss_room_' + urlCode);
+    if(local){
+      S = JSON.parse(local);
+      myName = localStorage.getItem('ss_myname') || '';
+      if(myName && S.members.find(m=>m.name===myName)){
+        enterApp(); return;
+      }
+    }
+    // fresh join
+    S.roomCode = urlCode;
+    S.binId = urlBin;
+    S.members = [];
+    S.expenses = [];
+    S.settled = [];
+    document.getElementById('screen-onboard').style.display='none';
+    showNameScreen(`You're joining room <b>${urlCode}</b>. Enter your name.`);
+    // load remote state
+    binGet(urlBin).then(remote=>{
+      S = {...remote, roomCode:urlCode, binId:urlBin};
+      saveLocal();
+      document.getElementById('name-prompt').innerHTML = `Room <b>${urlCode}</b> has ${S.members.map(m=>m.name).join(' & ')} · Enter your name.`;
+    }).catch(()=>{});
+    return;
+  }
+
+  // check last room
+  const lastCode = localStorage.getItem('ss_lastroom');
+  if(lastCode){
+    const raw = localStorage.getItem('ss_room_' + lastCode);
+    if(raw){
+      S = JSON.parse(raw);
+      myName = localStorage.getItem('ss_myname') || '';
+      if(myName && S.binId){
+        enterApp(); return;
+      }
+    }
+  }
+  // show onboarding
+})();
+</script>
+</body>
+</html>
