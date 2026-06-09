@@ -1,4 +1,4 @@
-const CACHE = 'splitsmart-v3';
+const CACHE = 'splitsmart-v4';
 const ASSETS = ['/splitsmart/', '/splitsmart/index.html', '/splitsmart/manifest.json', '/splitsmart/icon.png'];
 
 self.addEventListener('install', e => {
