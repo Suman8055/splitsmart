@@ -209,7 +209,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 <body>
 <div id="app">
   <div id="hdr">
-    <h1>SplitSmart</h1>
+    <div>
+      <h1>SplitSmart</h1>
+      <div id="version-tag" style="font-size:10px;color:var(--sub);font-weight:500;letter-spacing:.3px;margin-top:1px">v1.4.0</div>
+    </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="currency-pill" class="currency-pill" onclick="cycleCurrency()">$ USD</span>
       <span id="status-badge" class="badge" onclick="openShare()">No session</span>
@@ -370,6 +373,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
+const APP_VERSION = '1.4.0';
 const GIST_API = 'https://api.github.com/gists';
 const GH_TOK = ['gho_K7YZnFQibOXVs','C6n74QqWDScvHOhf82l2gxw'].join('');
 
@@ -1357,6 +1361,9 @@ function fmtTs(ts){
 }
 let _toastTimer;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>el.classList.remove('show'),2800);}
+
+// keep version tag in sync with constant
+(()=>{const el=document.getElementById('version-tag');if(el)el.textContent='v'+APP_VERSION;})();
 
 // ─── VISIBILITY ──────────────────────────────────────────────────────────────
 document.addEventListener('visibilitychange',()=>{
