@@ -211,7 +211,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
   <div id="hdr">
     <div>
       <h1>SplitSmart</h1>
-      <div id="version-tag" style="font-size:10px;color:var(--sub);font-weight:500;letter-spacing:.3px;margin-top:1px">v1.4.0</div>
+      <div id="version-tag" style="font-size:10px;color:var(--sub);font-weight:500;letter-spacing:.3px;margin-top:1px">v1.4.1</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="currency-pill" class="currency-pill" onclick="cycleCurrency()">$ USD</span>
@@ -373,7 +373,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.4.1';
 const GIST_API = 'https://api.github.com/gists';
 const GH_TOK = ['gho_K7YZnFQibOXVs','C6n74QqWDScvHOhf82l2gxw'].join('');
 
@@ -657,13 +657,41 @@ async function createRoom(){
 async function joinRoom(){
   const code=document.getElementById('join-code').value.trim().toUpperCase();
   if(code.length!==6){toast('Enter the 6-letter room code');return;}
+
+  // 1. Try localStorage first (fastest path)
   const local=localStorage.getItem('ss_room_'+code);
   if(local){
     S=JSON.parse(local);myName=localStorage.getItem('ss_myname')||'';
     if(myName&&S.members.find(m=>m.name===myName)){enterApp();return;}
     showNameScreen('Room found! Enter your name to join.');return;
   }
-  toast('Room code not found locally. Ask your partner to share the full link.');
+
+  // 2. Fall back: search GitHub Gists by description "SplitSmart CODE"
+  toast('Searching for room '+code+'…');
+  try{
+    // List gists for the account — paginate up to 3 pages to find the room
+    let found=null;
+    for(let page=1;page<=3&&!found;page++){
+      const res=await fetch(`${GIST_API}?per_page=100&page=${page}`,{headers:ghHdr(true)});
+      if(!res.ok) break;
+      const list=await res.json();
+      if(!list.length) break;
+      found=list.find(g=>g.description==='SplitSmart '+code);
+    }
+    if(!found){
+      toast('Room '+code+' not found. Ask your partner to share the invite link.');
+      return;
+    }
+    // Fetch room data from the found Gist
+    const data=await binGet(found.id);
+    if(!data) throw new Error('empty');
+    S={...data,roomCode:code,binId:found.id};
+    saveLocal();
+    localStorage.setItem('ss_lastroom',code);
+    showNameScreen(`Joining room <b>${code}</b>${S.members.length?' — '+S.members.map(m=>esc(m.name)).join(', '):''} · Enter your name.`);
+  }catch(e){
+    toast('Could not reach room '+code+'. Check your connection.');
+  }
 }
 
 function showNameScreen(msg=''){
