@@ -211,7 +211,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
   <div id="hdr">
     <div>
       <h1>SplitSmart</h1>
-      <div id="version-tag" style="font-size:10px;color:var(--sub);font-weight:500;letter-spacing:.3px;margin-top:1px">v1.4.1</div>
+      <div id="version-tag" style="font-size:10px;color:var(--sub);font-weight:500;letter-spacing:.3px;margin-top:1px">v1.4.2</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="currency-pill" class="currency-pill" onclick="cycleCurrency()">$ USD</span>
@@ -373,7 +373,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-const APP_VERSION = '1.4.1';
+const APP_VERSION = '1.4.2';
 const GIST_API = 'https://api.github.com/gists';
 const GH_TOK = ['gho_K7YZnFQibOXVs','C6n74QqWDScvHOhf82l2gxw'].join('');
 
@@ -676,7 +676,7 @@ async function joinRoom(){
       if(!res.ok) break;
       const list=await res.json();
       if(!list.length) break;
-      found=list.find(g=>g.description==='SplitSmart '+code);
+      found=list.find(g=>g.description==='SplitSmart '+code||g.description==='SplitSmart room '+code);
     }
     if(!found){
       toast('Room '+code+' not found. Ask your partner to share the invite link.');
