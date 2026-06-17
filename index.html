@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SplitSmart">
@@ -21,9 +21,9 @@
 @media(prefers-color-scheme:dark){
   :root{--bg:#1C1C1E;--card:#2C2C2E;--text:#FFF;--sub:#8E8E93;--sep:#38383A;--overlay:rgba(0,0,0,.6)}
 }
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;position:fixed;width:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background:var(--bg);color:var(--text)}
-#app{position:fixed;top:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#app{position:fixed;top:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 
 /* HEADER */
 #hdr{background:var(--card);padding:calc(var(--safe-top)+6px) 16px 10px;border-bottom:1px solid var(--sep);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -32,13 +32,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 #hdr .badge.live{border-color:var(--green);color:var(--green)}
 
 /* NAV */
-#nav{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--sep);display:flex;padding-bottom:var(--safe-bot);z-index:100;flex-shrink:0}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--sep);display:flex;padding-bottom:var(--safe-bot);z-index:100;flex-shrink:0}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;background:none;border:none;color:var(--sub);font-size:9px;cursor:pointer;transition:color .15s}
 .nav-btn svg{width:20px;height:20px}
 .nav-btn.on{color:var(--purple)}
 
 /* CONTENT */
-#content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:var(--nav)}
+#content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:auto;touch-action:pan-y;overscroll-behavior:contain;padding-bottom:var(--nav)}
 
 /* CARDS */
 .card{background:var(--card);border-radius:14px;padding:16px;margin:12px 16px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
@@ -99,8 +99,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 .balance-box .desc{font-size:14px;color:var(--sub);margin-top:4px}
 
 /* SHARE PANEL */
-#share-panel{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bot));z-index:300;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-#share-panel.open{transform:translateY(0)}
+#share-panel{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bot));z-index:300;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+#share-panel.open{transform:translateX(-50%) translateY(0)}
 #share-panel h3{font-size:17px;font-weight:700;margin-bottom:16px}
 #share-overlay{position:fixed;inset:0;background:var(--overlay);z-index:299;display:none}
 #share-overlay.open{display:block}
@@ -109,8 +109,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 .code-box small{font-size:12px;color:var(--sub)}
 
 /* ADD / EDIT SHEET */
-#add-sheet{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bot));z-index:300;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:94vh;overflow-y:auto}
-#add-sheet.open{transform:translateY(0)}
+#add-sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bot));z-index:300;transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:94vh;overflow-y:auto}
+#add-sheet.open{transform:translateX(-50%) translateY(0)}
 #add-overlay{position:fixed;inset:0;background:var(--overlay);z-index:299;display:none}
 #add-overlay.open{display:block}
 #add-sheet h3{font-size:17px;font-weight:700;margin-bottom:16px}
@@ -145,7 +145,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 .filter-chip.on{background:var(--purple);color:#fff;border-color:var(--purple)}
 
 /* FAB */
-.fab{position:fixed;bottom:calc(var(--nav) + 16px);right:calc(max((100vw - 480px)/2, 0px) + 16px);width:52px;height:52px;border-radius:50%;background:var(--purple);color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 14px rgba(94,92,230,.4);display:flex;align-items:center;justify-content:center;z-index:50}
+.fab{position:absolute;bottom:calc(var(--nav) + 16px);right:16px;width:52px;height:52px;border-radius:50%;background:var(--purple);color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 14px rgba(94,92,230,.4);display:flex;align-items:center;justify-content:center;z-index:50}
 
 /* SETTLE BTN */
 .settle-btn{display:block;width:calc(100% - 32px);margin:12px 16px 0;padding:14px;border-radius:12px;border:none;background:var(--green);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
@@ -315,7 +315,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 
 <!-- RECURRING SHEET -->
 <div id="recur-overlay" onclick="closeRecur()"></div>
-<div id="recur-sheet" style="position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bot));z-index:300;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:88vh;overflow-y:auto">
+<div id="recur-sheet" style="position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bot));z-index:300;transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:88vh;overflow-y:auto">
   <h3 style="font-size:17px;font-weight:700;margin-bottom:16px">Add Recurring Expense</h3>
   <div class="field">
     <label>Name</label>
@@ -406,6 +406,7 @@ let S = {
   settled:[],     // [{id, ts, debtor, creditor, amount, note}]
   activity:[],    // [{id, ts, type, text, color}]
   recurring:[],   // [{id, name, payer, category, amount, splitType, splits, dayOfMonth, lastAdded}]
+  deletedIds:[],  // tombstone — IDs that have been deleted; prevents re-add on sync
   currency:'USD',
   nextId:1,
 };
@@ -421,6 +422,8 @@ let calMonth = new Date().getMonth();
 let calSelDay= null;
 let syncInterval = null;
 let syncStatus   = 'idle';
+let syncInFlight = false;
+let lastEtag     = '';
 let recurPayer   = '';
 
 // ─── CURRENCY ────────────────────────────────────────────────────────────────
@@ -463,15 +466,19 @@ function ghHdr(write=false){
   return h;
 }
 async function binCreate(){
-  const res=await fetch(GIST_API,{method:'POST',headers:ghHdr(true),body:JSON.stringify({description:'SplitSmart '+S.roomCode,public:true,files:{'room.json':{content:JSON.stringify(S)}}})});
+  const res=await fetch(GIST_API,{method:'POST',headers:ghHdr(true),body:JSON.stringify({description:'SplitSmart '+S.roomCode,public:false,files:{'room.json':{content:JSON.stringify(S)}}})});
   if(!res.ok) throw new Error('create '+res.status);
   return (await res.json()).id||null;
 }
 async function binGet(id){
-  const raw=`https://gist.githubusercontent.com/Suman8055/${id}/raw/room.json?t=${Date.now()}`;
-  const res=await fetch(raw,{cache:'no-store'});
+  const h={...ghHdr(false)};
+  if(lastEtag) h['If-None-Match']=lastEtag;
+  const res=await fetch(`${GIST_API}/${id}`,{headers:h,cache:'no-store'});
+  if(res.status===304) return null; // nothing changed
   if(!res.ok) throw new Error('get '+res.status);
-  return res.json();
+  lastEtag=res.headers.get('ETag')||'';
+  const gist=await res.json();
+  return JSON.parse(gist.files['room.json'].content);
 }
 async function binPut(id,data){
   const res=await fetch(`${GIST_API}/${id}`,{method:'PATCH',headers:ghHdr(true),body:JSON.stringify({files:{'room.json':{content:JSON.stringify(data)}}})});
@@ -484,36 +491,41 @@ function setSyncStatus(s){
   syncStatus=s;
   const badge=document.getElementById('status-badge');
   if(!badge) return;
-  if(s==='ok'){badge.className='badge live';badge.innerHTML=`<span class="sync-dot ok"></span>${S.roomCode}`;}
+  if(s==='ok'){badge.className='badge live';badge.innerHTML=`<span class="sync-dot ok"></span>${esc(S.roomCode)}`;}
   else if(s==='syncing'){badge.className='badge';badge.innerHTML=`<span class="sync-dot syncing"></span>syncing…`;}
   else if(s==='err'){badge.className='badge';badge.innerHTML=`<span class="sync-dot err"></span>offline`;}
   else{badge.className='badge';badge.innerHTML=S.roomCode||'No session';}
 }
-function mergeById(a,b){const m=new Map();[...a,...b].forEach(x=>m.set(x.id,x));return[...m.values()];}
+function mergeById(a,b,tombstones=[]){const dead=new Set(tombstones);const m=new Map();[...a,...b].forEach(x=>{if(!dead.has(x.id))m.set(x.id,x);});return[...m.values()];}
 function mergeMbrs(a,b){const m=new Map();[...a,...b].forEach(x=>m.set(x.name,x));return[...m.values()];}
 
 async function syncNow(push=false){
-  if(!S.binId) return;
+  if(!S.binId||syncInFlight) return;
+  syncInFlight=true;
   setSyncStatus('syncing');
   try{
     const remote=await binGet(S.binId);
+    if(remote===null){setSyncStatus('ok');return;}  // 304 — nothing changed
+    const allDeleted=[...new Set([...(remote.deletedIds||[]),...(S.deletedIds||[])])];
     const remIds=new Set((remote.expenses||[]).map(e=>e.id));
     const localOnly=S.expenses.filter(e=>!remIds.has(e.id));
-    const needPush=push||localOnly.length>0;
+    const needPush=push||localOnly.length>0||allDeleted.length>(remote.deletedIds||[]).length;
     if(needPush){
       const merged={...remote,
-        expenses:mergeById(remote.expenses||[],S.expenses),
-        settled: mergeById(remote.settled||[], S.settled||[]),
-        activity:mergeById(remote.activity||[],S.activity||[]),
+        expenses: mergeById(remote.expenses||[],S.expenses,allDeleted),
+        settled:  mergeById(remote.settled||[], S.settled||[]),
+        activity: mergeById(remote.activity||[],S.activity||[]),
         recurring:mergeById(remote.recurring||[],S.recurring||[]),
-        members: mergeMbrs(remote.members||[],S.members||[]),
-        nextId:  Math.max(remote.nextId||1,S.nextId||1),
-        currency:S.currency||remote.currency||'USD',
+        members:  mergeMbrs(remote.members||[],S.members||[]),
+        deletedIds:allDeleted,
+        nextId:   Math.max(remote.nextId||1,S.nextId||1),
+        currency: S.currency||remote.currency||'USD',
       };
       await binPut(S.binId,merged);
       S=merged;
     } else {
-      S.expenses =mergeById(remote.expenses||[],S.expenses);
+      S.deletedIds=allDeleted;
+      S.expenses =mergeById(remote.expenses||[],S.expenses,allDeleted);
       S.settled  =mergeById(remote.settled||[],S.settled||[]);
       S.activity =mergeById(remote.activity||[],S.activity||[]);
       S.recurring=mergeById(remote.recurring||[],S.recurring||[]);
@@ -527,6 +539,7 @@ async function syncNow(push=false){
     updateCurrencyPill();
     renderTab();
   }catch(e){setSyncStatus('err');}
+  finally{syncInFlight=false;}
 }
 function startSync(){
   if(syncInterval) clearInterval(syncInterval);
@@ -539,22 +552,26 @@ function checkRecurring(){
   if(!S.recurring||!S.recurring.length) return;
   const today=localDate();
   const [ty,tm,td]=today.split('-').map(Number);
+  const deletedSet=new Set(S.deletedIds||[]);
   let changed=false;
   S.recurring.forEach(r=>{
     const targetDay=r.dayOfMonth||1;
     if(td!==targetDay) return;
     const key=`${ty}-${String(tm).padStart(2,'0')}`;
     if(r.lastAdded===key) return;
-    // auto-add expense
+    // Deterministic ID: same on all devices for this (recurring rule, month)
+    const deterministicId=`e-recur-${r.id}-${key}`;
+    if(deletedSet.has(deterministicId)) return; // manually deleted this month
+    if(S.expenses.find(e=>e.id===deterministicId)){r.lastAdded=key;return;} // already present
     const exp={
-      id:'e'+Date.now()+Math.random().toString(36).slice(2,5),
+      id:deterministicId,
       payer:r.payer, category:r.category, amount:r.amount,
       splits:r.splits||null, splitType:r.splitType||'equal',
       note:r.name+' (auto)', date:today, ts:Date.now(), recurring:true
     };
     S.expenses.push(exp);
     r.lastAdded=key;
-    logActivity('add',`🔄 Auto-added "${r.name}" ${fmt(r.amount)} (recurring)`,CAT_COLORS[r.category]||'#8E8E93');
+    logActivity('add',`🔄 Auto-added "${esc(r.name)}" ${fmt(r.amount)} (recurring)`,CAT_COLORS[r.category]||'#8E8E93');
     changed=true;
   });
   if(changed){saveLocal();syncNow(true);}
@@ -621,7 +638,7 @@ function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i
 
 async function createRoom(){
   const code=genCode();
-  S={roomCode:code,binId:'',members:[],expenses:[],settled:[],activity:[],recurring:[],currency:'USD',nextId:1};
+  S={roomCode:code,binId:'',members:[],expenses:[],settled:[],activity:[],recurring:[],deletedIds:[],currency:'USD',nextId:1};
   setSyncStatus('syncing');
   try{
     const id=await binCreate();
@@ -1027,7 +1044,7 @@ function renderActivity(){
       html+=`<div class="act-item">
         <div class="act-dot" style="background:${a.color||'#8E8E93'}"></div>
         <div class="act-body">
-          <div>${a.text}</div>
+          <div>${esc(a.text)}</div>
           <div class="act-time">${fmtTs(a.ts)}</div>
         </div>
       </div>`;
@@ -1152,8 +1169,8 @@ function updateSplitPreview(){
     preview.textContent=sum===100?'✅ 100%':`⚠️ Total: ${sum}% (must equal 100%)`;
     preview.style.color=sum===100?'var(--green)':'var(--red)';
   } else if(splitType==='exact'){
-    preview.textContent=Math.abs(sum-total)<0.02?`✅ ${fmt(sum)}`:`⚠️ Total: ${fmt(sum)} (must equal ${fmt(total)})`;
-    preview.style.color=Math.abs(sum-total)<0.02?'var(--green)':'var(--red)';
+    preview.textContent=Math.abs(sum-total)<0.01?`✅ ${fmt(sum)}`:`⚠️ Total: ${fmt(sum)} (must equal ${fmt(total)})`;
+    preview.style.color=Math.abs(sum-total)<0.01?'var(--green)':'var(--red)';
   } else {
     const totalShares=sum;
     const parts=names.map(n=>`${esc(n)}: ${fmt(totalShares>0?total*vals[n]/totalShares:0)}`).join(' · ');
@@ -1174,7 +1191,7 @@ function computeSplits(total){
   } else if(splitType==='exact'){
     let sumExact=0;
     names.forEach(n=>{splits[n]=parseFloat(document.getElementById('sp-'+n)?.value)||0;sumExact+=splits[n];});
-    if(Math.abs(sumExact-total)>0.05){toast(`Exact amounts must add up to ${fmt(total)}`);return null;}
+    if(Math.abs(sumExact-total)>0.01){toast(`Exact amounts must add up to ${fmt(total)}`);return null;}
   } else { // shares
     let totalShares=0;
     const raw={};
@@ -1219,6 +1236,7 @@ async function submitExpense(){
 async function deleteExpense(id){
   const e=S.expenses.find(x=>x.id===id);
   if(!confirm(`Delete "${e?.note||e?.category||'expense'}" ${fmt(e?.amount||0)}?`)) return;
+  S.deletedIds=[...new Set([...(S.deletedIds||[]),id])];
   S.expenses=S.expenses.filter(x=>x.id!==id);
   logActivity('delete',`🗑 ${myName} deleted "${e?.note||e?.category}" ${fmt(e?.amount||0)}`,'#FF3B30');
   saveLocal();
@@ -1230,6 +1248,7 @@ async function deleteEditingExpense(){
   if(!editingId) return;
   const e=S.expenses.find(x=>x.id===editingId);
   if(!confirm(`Delete "${e?.note||e?.category||'expense'}"?`)) return;
+  S.deletedIds=[...new Set([...(S.deletedIds||[]),editingId])];
   S.expenses=S.expenses.filter(x=>x.id!==editingId);
   logActivity('delete',`🗑 ${myName} deleted "${e?.note||e?.category}" ${fmt(e?.amount||0)}`,'#FF3B30');
   closeAdd();
@@ -1247,11 +1266,11 @@ function openRecur(){
   document.getElementById('recur-name').value='';
   document.getElementById('recur-amount').value='';
   document.getElementById('recur-day').value='1';
-  document.getElementById('recur-sheet').style.transform='translateY(0)';
+  document.getElementById('recur-sheet').style.transform='translateX(-50%) translateY(0)';
   document.getElementById('recur-overlay').style.cssText='position:fixed;inset:0;background:var(--overlay);z-index:299;display:block';
 }
 function closeRecur(){
-  document.getElementById('recur-sheet').style.transform='translateY(100%)';
+  document.getElementById('recur-sheet').style.transform='translateX(-50%) translateY(100%)';
   document.getElementById('recur-overlay').style.display='none';
 }
 function selRecurPayer(n){
@@ -1339,6 +1358,12 @@ function fmtTs(ts){
 let _toastTimer;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>el.classList.remove('show'),2800);}
 
+// ─── VISIBILITY ──────────────────────────────────────────────────────────────
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){clearInterval(syncInterval);syncInterval=null;}
+  else if(S.binId) startSync();
+});
+
 // ─── SW ──────────────────────────────────────────────────────────────────────
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/splitsmart/sw.js').catch(()=>{});});}
 
@@ -1353,7 +1378,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
       S=JSON.parse(local);myName=localStorage.getItem('ss_myname')||'';
       if(myName&&S.members.find(m=>m.name===myName)){enterApp();return;}
     }
-    S={roomCode:urlCode,binId:urlBin,members:[],expenses:[],settled:[],activity:[],recurring:[],currency:'USD',nextId:1};
+    S={roomCode:urlCode,binId:urlBin,members:[],expenses:[],settled:[],activity:[],recurring:[],deletedIds:[],currency:'USD',nextId:1};
     document.getElementById('screen-onboard').style.display='none';
     showNameScreen(`You're joining room <b>${urlCode}</b>. Enter your name.`);
     binGet(urlBin).then(remote=>{
