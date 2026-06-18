@@ -211,7 +211,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
   <div id="hdr">
     <div>
       <h1>SplitSmart</h1>
-      <div id="version-tag" style="font-size:10px;color:var(--sub);font-weight:500;letter-spacing:.3px;margin-top:1px">v1.4.3</div>
+      <div id="version-tag" style="font-size:10px;color:var(--sub);font-weight:500;letter-spacing:.3px;margin-top:1px">v1.4.4</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="currency-pill" class="currency-pill" onclick="cycleCurrency()">$ USD</span>
@@ -373,7 +373,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-const APP_VERSION = '1.4.3';
+const APP_VERSION = '1.4.4';
 const GIST_API = 'https://api.github.com/gists';
 const GH_TOK = ['gho_K7YZnFQibOXVs','C6n74QqWDScvHOhf82l2gxw'].join('');
 
@@ -1431,7 +1431,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
     const raw=localStorage.getItem('ss_room_'+lastCode);
     if(raw){
       S=JSON.parse(raw);myName=localStorage.getItem('ss_myname')||'';
-      if(myName&&S.binId){enterApp();return;}
+      if(myName&&S.members.find(m=>m.name===myName)){enterApp();return;}
     }
   }
 })();
